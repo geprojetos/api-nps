@@ -97,7 +97,7 @@ class UserController {
       });
     }
 
-    userRepository.delete({ id: params.id });
+    await userRepository.delete({ id: params.id });
 
     return response.status(200).json({
       success: `User ${user.email} is removed`,
