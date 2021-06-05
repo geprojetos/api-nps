@@ -7,8 +7,8 @@ const userTestCreate = {
   email: "user@uniteste.com",
 };
 const userTestUpdate = {
-  name: "user unit test",
-  email: "user@uniteste.com",
+  name: "updated user unit test",
+  email: "updated@uniteste.com",
 };
 let connectionStatus: boolean = false;
 
@@ -40,13 +40,15 @@ describe("User test", () => {
   });
 
   it("should be to update user", async () => {
-    const responseListUser = await request(app).get("/users/list");
-    const [responseParse] = JSON.parse(responseListUser.text);
-    const response = await request(app)
-      .patch(`/users/update/${responseParse.id}`)
+    const users = await request(app).get("/users/list");
+    const [userParse] = JSON.parse(users.text);
+    const updatedUser = await request(app)
+      .patch(`/users/${userParse.id}/update`)
       .send(userTestUpdate);
+    const response = await request(app).get("/users/list");
+    const [responseParse] = JSON.parse(response.text);
 
-    expect(response.status).toBe(200);
+    expect(updatedUser.status).toBe(200);
     expect(responseParse.name).toBe(userTestUpdate.name);
   });
 
@@ -54,7 +56,7 @@ describe("User test", () => {
     const responseListUser = await request(app).get("/users/list");
     const [responseParse] = JSON.parse(responseListUser.text);
     const response = await request(app).delete(
-      `/users/delete/${responseParse.id}`
+      `/users/${responseParse.id}/delete`
     );
 
     expect(response.status).toBe(200);
