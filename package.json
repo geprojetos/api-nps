@@ -4,13 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
     "test": "cross-env NODE_ENV=test jest",
     "rmbasetest": "rm src/database/database.test.sqlite",
     "posttest": "rm src/database/database.test.sqlite",
     "dev": "ts-node-dev --transpile-only --ignore-watch node_modules src/server.ts",
     "typeorm": "ts-node-dev node_modules/typeorm/cli.js",
     "m:c": "typeorm migration:create -n",
-    "m:r": "typeorm migration:run"
+    "m:r": "typeorm migration:run",
+    "m:d": "typeorm schema:drop"
   },
   "keywords": [],
   "author": "",
