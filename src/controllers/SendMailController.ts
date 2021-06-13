@@ -3,6 +3,7 @@ import { getCustomRepository } from "typeorm";
 import { SearchRepositories } from "../respositories/SearchRepositories";
 import { UsersRepositories } from "../respositories/UsersRepositories";
 import { UsersSearchsRepositories } from "../respositories/UsersSarchsRepositories";
+import { SendMailService } from "../services/SendMailService";
 
 class SendMailController {
   async list(request: Request, response: Response) {
@@ -15,6 +16,7 @@ class SendMailController {
   }
 
   async create(request: Request, response: Response) {
+    const sendMailService = new SendMailService();
     const { email, search_id } = request.body;
 
     const usersRepositories = getCustomRepository(UsersRepositories);
@@ -29,7 +31,6 @@ class SendMailController {
       });
     }
 
-    // validar usersRepositories
     const user = await usersRepositories.findOne({ email });
     if (!user) {
       return response.status(404).json({
@@ -37,7 +38,6 @@ class SendMailController {
       });
     }
 
-    // validar searchsRespositories
     const search = await searchsRespositories.findOne({ id: search_id });
     if (!search) {
       return response.status(404).json({
@@ -45,14 +45,24 @@ class SendMailController {
       });
     }
 
-    // salvar em searchsUsersRespositories
+    const sendMailServiceResponse = await sendMailService.execute(
+      user.email,
+      search.title,
+      search.description
+    );
+
+    if (!sendMailServiceResponse) {
+      return response.status(400).json({
+        error: "Error duration send mail",
+      });
+    }
+
     const usersSearchs = usersSearchsRespositories.create({
       user_id: user.id,
       search_id: search.id,
     });
     await usersSearchsRespositories.save(usersSearchs);
 
-    // retonar sucesso api
     return response.status(201).json(usersSearchs);
   }
 
