@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { resolve } from "path";
 import { getCustomRepository } from "typeorm";
 import { SearchRepositories } from "../respositories/SearchRepositories";
 import { UsersRepositories } from "../respositories/UsersRepositories";
@@ -45,23 +46,31 @@ class SendMailController {
       });
     }
 
-    const sendMailServiceResponse = await sendMailService.execute(
-      user.email,
-      search.title,
-      search.description
-    );
-
-    if (!sendMailServiceResponse) {
-      return response.status(400).json({
-        error: "Error duration send mail",
-      });
-    }
-
     const usersSearchs = usersSearchsRespositories.create({
       user_id: user.id,
       search_id: search.id,
     });
     await usersSearchsRespositories.save(usersSearchs);
+
+    const templateInfo = {
+      name: user.name,
+      title: search.title,
+      description: search.description,
+    };
+
+    const path = resolve(__dirname, "..", "views", "emails", "npsMail.hbs");
+
+    const sendMailServiceResponse = await sendMailService.execute(
+      user.email,
+      templateInfo,
+      path
+    );
+
+    if (!sendMailServiceResponse) {
+      return response.status(400).json({
+        error: "User search create, but error during send mail",
+      });
+    }
 
     return response.status(201).json(usersSearchs);
   }

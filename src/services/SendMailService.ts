@@ -1,4 +1,12 @@
 import nodemailer, { TestAccount, Transporter } from "nodemailer";
+import { compile } from "handlebars";
+import { readFileSync } from "fs";
+
+interface TemplateInfoProps {
+  name: string;
+  title: string;
+  description: string;
+}
 
 class SendMailService {
   private client: Transporter;
@@ -27,14 +35,16 @@ class SendMailService {
       });
   }
 
-  async execute(to: string, subject: string, html: string) {
+  async execute(to: string, templateInfo: TemplateInfoProps, path: string) {
+    const fileContent = readFileSync(path).toString("utf-8");
+    const templateParse = compile(fileContent);
+    const templateHtml = templateParse(templateInfo);
     if (!this.client) {
       return false;
     }
     const message = await this.client.sendMail({
       to,
-      subject,
-      html,
+      html: templateHtml,
       from: "NPS <noreplay@nps.com.br>",
     });
 
